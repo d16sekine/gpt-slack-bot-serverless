@@ -1,0 +1,38 @@
+{
+  "name": "gpt-slack-bot-serverless",
+  "version": "1.0.0",
+  "description": "",
+  "main": "handler.js",
+  "scripts": {
+    "deploy": "serverless deploy",
+    "producer": "serverless deploy function -f gptSlackBotProducer",
+    "consumer": "serverless deploy function -f gptSlackBotConsumer"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/d16sekine/gpt-slack-bot-serverless.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/d16sekine/gpt-slack-bot-serverless/issues"
+  },
+  "homepage": "https://github.com/d16sekine/gpt-slack-bot-serverless#readme",
+  "dependencies": {
+    "@aws-sdk/client-sqs": "^3.298.0",
+    "@aws-sdk/credential-providers": "^3.296.0",
+    "@slack/bolt": "^3.12.2",
+    "@slack/web-api": "^6.8.1",
+    "dayjs": "^1.11.7",
+    "dotenv": "^16.0.3",
+    "openai": "^3.2.1"
+  },
+  "devDependencies": {
+    "@types/aws-lambda": "^8.10.114",
+    "serverless-offline": "^12.0.4",
+    "serverless-plugin-typescript": "^2.1.4",
+    "ts-node": "^10.9.1",
+    "typescript": "^5.0.2"
+  }
+}

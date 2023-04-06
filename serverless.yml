@@ -1,0 +1,60 @@
+service: gpt-slack-bot-serverless
+
+frameworkVersion: '3'
+useDotenv: true
+
+provider:
+  name: aws
+  runtime: nodejs18.x
+
+  stage: dev
+  region: ap-northeast-1
+  profile: ${env:AWS_PROFILE_NAME}
+  environment:
+    AWS_PROFILE_NAME: ${env:AWS_PROFILE_NAME}
+    TIMEOUT_SECONDS: ${env:TIMEOUT_SECONDS}
+    SLACK_SIGNING_SECRET: ${env:SLACK_SIGNING_SECRET}
+    SLACK_BOT_TOKEN: ${env:SLACK_BOT_TOKEN}
+    OPENAI_API_KEY: ${env:OPENAI_API_KEY}
+    INTERVAL_SECONDS: ${env:INTERVAL_SECONDS}
+  iam:
+    role:
+      statements:
+        - Effect: 'Allow'
+          Action:
+            - 'sqs:SendMessage'
+            - 'sqs:GetQueueUrl'
+          Resource: 'arn:aws:sqs:${self:provider.region}:${aws:accountId}:gpt-slack-bot-serverless.fifo'
+plugins:
+  - serverless-plugin-typescript
+  - serverless-offline
+
+custom:
+  SQS_URL: https://sqs.${self:provider.region}.amazonaws.com/${aws:accountId}/gpt-slack-bot-serverless.fifo
+
+functions:
+  gptSlackBotProducer:
+    handler: src/gpt-bot-producer.handler
+    memorySize: 512
+    timeout: 5
+    events:
+      - http:
+          method: post
+          path: /slack/events
+  gptSlackBotConsumer:
+    handler: src/gpt-bot-consumer.handler
+    memorySize: 512
+    timeout: ${env:TIMEOUT_SECONDS, 60}
+    events:
+      - sqs:
+          arn: arn:aws:sqs:${self:provider.region}:${aws:accountId}:gpt-slack-bot-serverless.fifo
+    environment:
+      SQS_URL: ${self:custom.SQS_URL}
+resources:
+  Resources:
+    MyQueue:
+      Type: 'AWS::SQS::Queue'
+      Properties:
+        QueueName: 'gpt-slack-bot-serverless.fifo'
+        FifoQueue: True
+        VisibilityTimeout: ${env:TIMEOUT_SECONDS, 60}
