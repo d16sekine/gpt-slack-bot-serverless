@@ -35,21 +35,21 @@ custom:
 functions:
   gptSlackBotProducer:
     handler: src/gpt-bot-producer.handler
-    memorySize: 512
+    memorySize: 1024
     timeout: 5
     events:
       - http:
           method: post
           path: /slack/events
+    environment:
+      SQS_URL: ${self:custom.SQS_URL}
   gptSlackBotConsumer:
     handler: src/gpt-bot-consumer.handler
-    memorySize: 512
+    memorySize: 1024
     timeout: ${env:TIMEOUT_SECONDS, 60}
     events:
       - sqs:
           arn: arn:aws:sqs:${self:provider.region}:${aws:accountId}:gpt-slack-bot-serverless.fifo
-    environment:
-      SQS_URL: ${self:custom.SQS_URL}
 resources:
   Resources:
     MyQueue:
@@ -58,3 +58,4 @@ resources:
         QueueName: 'gpt-slack-bot-serverless.fifo'
         FifoQueue: True
         VisibilityTimeout: ${env:TIMEOUT_SECONDS, 60}
+        MessageRetentionPeriod: ${env:TIMEOUT_SECONDS, 60}
