@@ -31,6 +31,12 @@ Slack Appを新規作成し、下記を取得する。
 - Signing Secret
 - Bot User OAuth Token
 
+本リポジトリをcloneする。
+```
+git clone https://github.com/d16sekine/gpt-slack-bot-serverless.git
+```
+
+
 下記コマンドで.envファイルを作成し、環境変数を設定する。
 
 ```
