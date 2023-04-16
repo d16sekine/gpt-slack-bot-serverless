@@ -69,12 +69,14 @@ deployが完了すると、下記のようなendpointが生成される。
   - Request URLに、deployで作成したendpointを設定
   - Subscribe to bot eventsで下記を許可
     - message.channels
-z
+
 ![events setting](./docs/events.png)
 
 本Slack Appと連携したいチャンネルに、本Slack Appをインストールする。
 
 該当チャンネルでメッセージを投稿し、回答が返ってくれば動作確認OKです。
+
+![example](./docs/example.jpg)
 
 ## :bulb:License
 This project is licensed under the terms of the MIT license.
