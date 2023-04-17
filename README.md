@@ -16,6 +16,27 @@
 - APIからのレスポンスが来ない場合、環境変数INTERVAL_SECONDSで指定した時間間隔で「もう少しお待ちください」とメッセージを送ります。
 - AWS LambdaがTimeoutする前に、「すみません、時間切れです。」とメッセージを送ります。
 
+## :triangular_flag_on_post:Sequence Diagram
+
+- Producer API: API Gateway + AWS Lambda
+- Consumer API: AWS Lambda
+- FIFO queue: AWS SQS
+
+```mermaid
+sequenceDiagram
+    participant Slack
+    participant Producer API
+    participant FIFO queue
+    participant Consumer API
+    Slack ->> Producer API: request message
+    Producer API ->> Slack: instant reply
+    Producer API ->> FIFO queue: message
+    FIFO queue ->> Consumer API: message
+    Consumer API ->> OpenAI API: request
+    OpenAI API ->> Consumer API: response
+    Consumer API ->> Slack: reply message
+```
+
 ## :gear:Requirements
 
 - Node.js v16 or later
