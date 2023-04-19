@@ -21,7 +21,13 @@ module.exports.handler = async (event: SQSEvent) => {
 
     const response = await openai.createChatCompletion({
       model: 'gpt-3.5-turbo',
-      messages: [{ role: 'user', content: body.message }],
+      messages: [
+        {
+          role: 'system',
+          content: 'You are an AI assistant that helps people find information.',
+        },
+        { role: 'user', content: body.message },
+      ],
       temperature: 0,
     })
     await slackApi.postMessage(body.channelId, response.data.choices[0].message.content)
