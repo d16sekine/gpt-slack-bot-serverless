@@ -1,20 +1,16 @@
 # gpt-slack-bot-serverless
 
-- ServerlessでOpenAIのAPIと連携するSlackアプリです。
-- [Serverless Framework](https://www.serverless.com/)を使ってAWSにデプロイします。
-
+- OpenAIのAPIと連携するSlackアプリのバックエンド機能の提供
+- このSlackアプリをインストールしたチャンネルでメッセージを投稿すると、そのメッセージをOpenAIのAPIにリクエストし、その回答を同じチャンネルに投稿
 
 ## :mag:Demo
 
 ![demo](./docs/slack_demo.gif)
 
 ## :rocket:Feature
+- チャンネルごとの会話履歴を考慮
+- [Serverless Framework](https://www.serverless.com/)を使って1コマンドでAWSにデプロイ
 
-- このSlackアプリをインストールしたチャンネルでメッセージを投稿すると、そのメッセージをOpenAIのAPIにリクエストし、その回答を同じチャンネルに投稿します。
-- OpenAIのモデルは「gpt-3.5-turbo」です。
-- メッセージを受け付けると「ちょっとお待ちください」と返答します。
-- APIからのレスポンスが来ない場合、環境変数INTERVAL_SECONDSで指定した時間間隔で「もう少しお待ちください」とメッセージを送ります。
-- AWS LambdaがTimeoutする前に、「すみません、時間切れです。」とメッセージを送ります。
 
 ## :triangular_flag_on_post:Sequence Diagram
 
@@ -105,10 +101,15 @@ deployが完了すると、下記のようなendpointが生成される。
 
 本Slack Appと連携したいチャンネルに、本Slack Appをインストールする。
 
-該当チャンネルでメッセージを投稿し、回答が返ってくれば動作確認OKです。
+該当チャンネルでメッセージを投稿すると「ちょっとお待ちください」と返答される。
+その後、回答が返ってくれば動作確認OK。
 
 ![example](./docs/example.jpg)
 
+## :blue_book:Note
+- APIからのレスポンスが来ない場合、環境変数INTERVAL_SECONDSで指定した時間間隔で「もう少しお待ちください」というメッセージを投稿
+- AWS LambdaがTimeoutする前に、「すみません、時間切れです。」というメッセージを投稿
+- OpenAIのモデルは「gpt-3.5-turbo」を利用
 ## :bulb:License
 This project is licensed under the terms of the MIT license.
 
