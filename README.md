@@ -21,6 +21,7 @@
 - Producer API: API Gateway + AWS Lambda
 - Consumer API: AWS Lambda
 - FIFO queue: AWS SQS
+- History DB: AWS DynamoDB
 
 ```mermaid
 sequenceDiagram
@@ -28,13 +29,16 @@ sequenceDiagram
     participant Producer API
     participant FIFO queue
     participant Consumer API
+    participant History DB
     Slack ->> Producer API: request message
     Producer API ->> Slack: instant reply
     Producer API ->> FIFO queue: message
     FIFO queue ->> Consumer API: message
+    History DB ->> Consumer API: get messages
     Consumer API ->> OpenAI API: request
     OpenAI API ->> Consumer API: response
     Consumer API ->> Slack: reply message
+    Consumer API ->> History DB: push messages
 ```
 
 ## :gear:Requirements

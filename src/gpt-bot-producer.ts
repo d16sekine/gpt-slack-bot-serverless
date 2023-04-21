@@ -1,6 +1,7 @@
 import { Context, APIGatewayProxyCallback, APIGatewayEvent } from 'aws-lambda'
 import { App, AwsLambdaReceiver } from '@slack/bolt'
 import { sendSqs } from './utility/sqs'
+import { GptChatHistory } from './utility/GptChatHistory'
 
 const secret: string = process.env.SLACK_SIGNING_SECRET || ''
 
@@ -11,10 +12,19 @@ const app = new App({
   receiver: awsLambdaReceiver,
 })
 
+const gptChatHistory = new GptChatHistory()
+
 app.message(async ({ message, say }) => {
   // @ts-ignore
   if (!message.text) return
+
   try {
+    // @ts-ignore
+    if (message.text === 'reset' || message.text === 'リセット' || message.text === 'りせっと') {
+      await gptChatHistory.putMessages(message.channel, [])
+      await say('reset chat history.')
+      return
+    }
     const body = {
       channelId: message.channel,
       // @ts-ignore
