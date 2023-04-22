@@ -17,6 +17,7 @@ provider:
     SLACK_BOT_TOKEN: ${env:SLACK_BOT_TOKEN}
     OPENAI_API_KEY: ${env:OPENAI_API_KEY}
     INTERVAL_SECONDS: ${env:INTERVAL_SECONDS}
+    MAX_PROMPT_TOKEN_NUMBER: ${env:MAX_PROMPT_TOKEN_NUMBER}
   iam:
     role:
       statements:
@@ -25,6 +26,11 @@ provider:
             - 'sqs:SendMessage'
             - 'sqs:GetQueueUrl'
           Resource: 'arn:aws:sqs:${self:provider.region}:${aws:accountId}:gpt-slack-bot-serverless.fifo'
+        - Effect: 'Allow'
+          Action:
+            - dynamodb:GetItem
+            - dynamodb:PutItem
+          Resource: 'arn:aws:dynamodb:${self:provider.region}:${aws:accountId}:table/gptChatHistory'
 plugins:
   - serverless-plugin-typescript
   - serverless-offline
@@ -59,3 +65,21 @@ resources:
         FifoQueue: True
         VisibilityTimeout: ${env:TIMEOUT_SECONDS, 60}
         MessageRetentionPeriod: ${env:TIMEOUT_SECONDS, 60}
+    # Create DynamoDB
+    DynamoDbTable:
+      Type: 'AWS::DynamoDB::Table'
+      Properties:
+        # set table name
+        TableName: gptChatHistory
+        # set Partition Key / Sort Key
+        AttributeDefinitions:
+          - AttributeName: channelId
+            AttributeType: S
+        # set the type of key
+        KeySchema:
+          - AttributeName: channelId
+            KeyType: HASH
+        # set CapacityUnits
+        ProvisionedThroughput:
+          ReadCapacityUnits: 2
+          WriteCapacityUnits: 2
