@@ -1,6 +1,7 @@
 import { SQSEvent } from 'aws-lambda'
 import { SlackApi } from './utility/SlackApi'
 import { GptChatHistory, Message } from './utility/GptChatHistory'
+import { GptToken } from './utility/GptToken'
 
 const { Configuration, OpenAIApi } = require('openai')
 
@@ -14,6 +15,7 @@ module.exports.handler = async (event: SQSEvent) => {
   const slackApi = new SlackApi(process.env.SLACK_BOT_TOKEN)
   const openai = new OpenAIApi(configuration)
   const gptChatHistory = new GptChatHistory()
+  const gptToken = new GptToken()
 
   const body = JSON.parse(event.Records[0].body)
 
@@ -29,14 +31,24 @@ module.exports.handler = async (event: SQSEvent) => {
     ]
     const dbMessages: Message[] = await gptChatHistory.getMessages(body.channelId)
 
-    const requestMessages = systemMessage.concat(dbMessages)
+    const systemTokens: number = gptToken.countTokens(systemMessage)
+    const maxDbMessageTokenNumber: number = Number(process.env.MAX_PROMPT_TOKEN_NUMBER) - systemTokens
+
+    const reducedDbMessage: Message[] = gptToken.reduceMessages(dbMessages, maxDbMessageTokenNumber)
+
+    const requestMessages = systemMessage.concat(reducedDbMessage)
     requestMessages.push({ role: 'user', content: body.message })
+
+    console.log(requestMessages)
 
     const response = await openai.createChatCompletion({
       model: 'gpt-3.5-turbo',
       messages: requestMessages,
       temperature: 0,
+      max_tokens: 1000,
     })
+
+    console.log('token usage:', response.data.usage)
 
     const messageHistory: Message[] = [
       { role: 'user', content: body.message },
@@ -46,8 +58,10 @@ module.exports.handler = async (event: SQSEvent) => {
       },
     ]
 
+    const newDbMessages: Message[] = reducedDbMessage.concat(messageHistory)
+
     await slackApi.postMessage(body.channelId, response.data.choices[0].message.content)
-    await gptChatHistory.pushMessages(body.channelId, messageHistory)
+    await gptChatHistory.putMessages(body.channelId, newDbMessages)
 
     clearInterval(intervalId)
     clearTimeout(timerId)

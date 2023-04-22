@@ -17,6 +17,7 @@ provider:
     SLACK_BOT_TOKEN: ${env:SLACK_BOT_TOKEN}
     OPENAI_API_KEY: ${env:OPENAI_API_KEY}
     INTERVAL_SECONDS: ${env:INTERVAL_SECONDS}
+    MAX_PROMPT_TOKEN_NUMBER: ${env:MAX_PROMPT_TOKEN_NUMBER}
   iam:
     role:
       statements:
