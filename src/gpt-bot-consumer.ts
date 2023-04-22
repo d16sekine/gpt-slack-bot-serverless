@@ -12,7 +12,7 @@ module.exports.handler = async (event: SQSEvent) => {
     apiKey: process.env.OPENAI_API_KEY,
   })
 
-  const slackApi = new SlackApi(process.env.SLACK_BOT_TOKEN)
+  const slackApi = new SlackApi(process.env.SLACK_BOT_TOKEN || '')
   const openai = new OpenAIApi(configuration)
   const gptChatHistory = new GptChatHistory()
   const gptToken = new GptToken()
@@ -76,7 +76,7 @@ module.exports.handler = async (event: SQSEvent) => {
 const intervalMessage = (channelId: string, seconds: number): NodeJS.Timer => {
   const intervalId = setInterval(async function () {
     try {
-      const slackApi = new SlackApi(process.env.SLACK_BOT_TOKEN)
+      const slackApi = new SlackApi(process.env.SLACK_BOT_TOKEN || '')
 
       await slackApi.postMessage(channelId, 'もう少しお待ちください。')
     } catch (error) {
@@ -90,7 +90,7 @@ const intervalMessage = (channelId: string, seconds: number): NodeJS.Timer => {
 const timeoutMessage = (channelId: string, seconds: number, intervalId: NodeJS.Timeout) => {
   const timerId = setTimeout(async function () {
     try {
-      const slackApi = new SlackApi(process.env.SLACK_BOT_TOKEN)
+      const slackApi = new SlackApi(process.env.SLACK_BOT_TOKEN || '')
 
       clearInterval(intervalId)
       await slackApi.postMessage(channelId, 'すみません、時間切れです。')
