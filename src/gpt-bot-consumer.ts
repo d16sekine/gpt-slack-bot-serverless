@@ -60,7 +60,11 @@ module.exports.handler = async (event: SQSEvent) => {
 
     const newDbMessages: Message[] = reducedDbMessage.concat(messageHistory)
 
-    await slackApi.postMessage(body.channelId, response.data.choices[0].message.content)
+    const slackMessage: string =
+      response.data.choices[0].message.content +
+      `\n-----\nprompt tokens: ${response.data.usage.prompt_tokens}, completion tokens: ${response.data.usage.completion_tokens}`
+
+    await slackApi.postMessage(body.channelId, slackMessage)
     await gptChatHistory.putMessages(body.channelId, newDbMessages)
 
     clearInterval(intervalId)
