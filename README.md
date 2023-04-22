@@ -8,7 +8,8 @@
 ![demo](./docs/slack_demo.gif)
 
 ## :rocket:Feature
-- チャンネルごとの会話履歴を考慮
+- チャンネルごとの会話履歴を考慮したプロンプトの作成
+- 指定したトークン数に応じた会話履歴の自動削除機能
 - [Serverless Framework](https://www.serverless.com/)を使って1コマンドでAWSにデプロイ
 
 
