@@ -1,6 +1,6 @@
 # gpt-slack-bot-serverless
 
-- OpenAIのAPIと連携するSlackアプリのバックエンド機能の提供
+- OpenAIのAPIと連携するSlackアプリのバックエンド機能をall in oneで提供
 - このSlackアプリをインストールしたチャンネルでメッセージを投稿すると、そのメッセージをOpenAIのAPIにリクエストし、その回答を同じチャンネルに投稿
 
 ## :mag:Demo
@@ -52,6 +52,8 @@ Slack Appを新規作成し、下記を取得する。
 - Signing Secret
 - Bot User OAuth Token
 
+参考：[Bolt 入門ガイド](https://slack.dev/bolt-js/ja-jp/tutorial/getting-started)
+
 本リポジトリをcloneする。
 ```
 git clone https://github.com/d16sekine/gpt-slack-bot-serverless.git
@@ -73,6 +75,7 @@ cp .env_example .env
 |SLACK_SIGNING_SECRET|SlackのSigning Secretの値|
 |SLACK_BOT_TOKEN|SlackのBot User OAuth Tokenの値|
 |OPENAI_API_KEY|OpenAIのAPIキー|
+|MAX_PROMPT_TOKEN_NUMBER|Open AIのAPIにpromptを送信する際の最大トークン数。デフォルト：3000|
 
 下記コマンドでAWSにdeployする
 ```
