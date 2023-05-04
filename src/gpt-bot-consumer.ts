@@ -2,18 +2,19 @@ import { SQSEvent } from 'aws-lambda'
 import { SlackApi } from './utility/SlackApi'
 import { GptChatHistory, Message } from './utility/GptChatHistory'
 import { GptToken } from './utility/GptToken'
-
-const { Configuration, OpenAIApi } = require('openai')
+import { ChatOpenAI } from 'langchain/chat_models/openai'
+import { HumanChatMessage, AIChatMessage, SystemChatMessage } from 'langchain/schema'
 
 module.exports.handler = async (event: SQSEvent) => {
   console.log('event:', event)
 
-  const configuration = new Configuration({
-    apiKey: process.env.OPENAI_API_KEY,
-  })
+  // const configuration = new Configuration({
+  //   apiKey: process.env.OPENAI_API_KEY,
+  // })
 
   const slackApi = new SlackApi(process.env.SLACK_BOT_TOKEN || '')
-  const openai = new OpenAIApi(configuration)
+  const chatModel = new ChatOpenAI({ modelName: 'gpt-3.5-turbo', temperature: 0 })
+
   const gptChatHistory = new GptChatHistory()
   const gptToken = new GptToken()
 
@@ -41,29 +42,25 @@ module.exports.handler = async (event: SQSEvent) => {
 
     console.log(requestMessages)
 
-    const response = await openai.createChatCompletion({
-      model: 'gpt-3.5-turbo',
-      messages: requestMessages,
-      temperature: 0,
-      max_tokens: 1000,
+    const requestChatMessages = requestMessages.map((item) => {
+      if (item.role === 'system') return new SystemChatMessage(item.content)
+      else if (item.role === 'assistant') return new AIChatMessage(item.content)
+      return new HumanChatMessage(item.content)
     })
 
-    console.log('token usage:', response.data.usage)
+    const response = await chatModel.call(requestChatMessages)
 
     const messageHistory: Message[] = [
       { role: 'user', content: body.message },
       {
         role: 'assistant',
-        content: response.data.choices[0].message.content,
+        content: response.text,
       },
     ]
 
     const newDbMessages: Message[] = reducedDbMessage.concat(messageHistory)
 
-    const slackMessage: string =
-      response.data.choices[0].message.content +
-      `\n-----\nprompt tokens: ${response.data.usage.prompt_tokens}, completion tokens: ${response.data.usage.completion_tokens}`
-
+    const slackMessage: string = response.text
     await slackApi.postMessage(body.channelId, slackMessage)
     await gptChatHistory.putMessages(body.channelId, newDbMessages)
 

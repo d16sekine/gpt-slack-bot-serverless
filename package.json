@@ -30,6 +30,7 @@
     "@slack/web-api": "^6.8.1",
     "dayjs": "^1.11.7",
     "dotenv": "^16.0.3",
+    "langchain": "^0.0.68",
     "openai": "^3.2.1"
   },
   "devDependencies": {
